@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: signal-clone-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    disk:
+      name: signal-clone-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:////var/data/signal.db
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: COOKIE_SAMESITE
+        value: none
+      - key: FRONTEND_ORIGIN_REGEX
+        value: ^https://[a-zA-Z0-9-]+\.vercel\.app$
+      - key: FRONTEND_ORIGINS
+        sync: false
