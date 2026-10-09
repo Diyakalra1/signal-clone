@@ -256,9 +256,6 @@ export default function ChatPage() {
   // Load conversations from the authenticated backend.
   const loadConversations = useCallback(async () => {
     try {
-      setLoadingChats(true);
-      setError("");
-
       const data: Conversation[] = await apiFetch("/conversations/");
       setConversations(data);
 
@@ -279,8 +276,27 @@ export default function ChatPage() {
   }, []);
 
   useEffect(() => {
-    void loadConversations();
-  }, [loadConversations]);
+    let cancelled = false;
+    apiFetch("/conversations/")
+      .then((data: Conversation[]) => {
+        if (cancelled) return;
+        setConversations(data);
+        setSelectedId((current) =>
+          current !== null && data.some((chat) => chat.id === current)
+            ? current
+            : data.length ? data[0].id : null
+        );
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Could not load conversations");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingChats(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     apiFetch("/auth/me")
@@ -306,7 +322,6 @@ export default function ChatPage() {
   // Load history and open one WebSocket for the selected conversation.
   useEffect(() => {
     if (selectedId === null) {
-      setMessages([]);
       return;
     }
 

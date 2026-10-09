@@ -17,5 +17,6 @@ frontend/.next/
 frontend/out/
 frontend/.vercel/
 frontend/*.tsbuildinfo
+/.next/
 .neon
 node_modules/
