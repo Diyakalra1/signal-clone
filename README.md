@@ -89,25 +89,27 @@ The Blueprint enables secure cross-site cookies and allows Vercel preview origin
 - `backend/models.py`: SQLAlchemy entities; `backend/database.py` selects SQLite or PostgreSQL from `DATABASE_URL`.
 - `backend/seed.py`: demo users and sample direct/group conversations.
 
+### Architecture diagram
+
 ```mermaid
 flowchart LR
-    U[User in browser]
-    FE[Next.js frontend<br/>Vercel]
-    API[FastAPI API<br/>Render]
-    AUTH[Auth, contacts,<br/>conversations, messages]
-    WS[Authenticated WebSocket<br/>messages, typing, presence, receipts]
-    ORM[SQLAlchemy models]
-    PG[(Neon PostgreSQL<br/>hosted)]
-    SQ[(SQLite<br/>local development)]
+    BROWSER[Browser]
+    FRONTEND[Next.js frontend - Vercel]
+    REST[FastAPI REST API - Render]
+    SOCKET[Authenticated WebSocket - Render]
+    ROUTES[Auth, contacts, conversations, messages]
+    MODELS[SQLAlchemy models]
+    POSTGRES[(Neon PostgreSQL - hosted)]
+    SQLITE[(SQLite - local development)]
 
-    U --> FE
-    FE -->|HTTPS JSON + session cookie| API
-    FE <-->|WSS events| WS
-    API --> AUTH
-    AUTH --> ORM
-    WS --> ORM
-    ORM --> PG
-    ORM -. local DATABASE_URL .-> SQ
+    BROWSER --> FRONTEND
+    BROWSER -->|HTTPS JSON and session cookie| REST
+    BROWSER <-->|WSS messages, typing, presence, receipts| SOCKET
+    REST --> ROUTES
+    ROUTES --> MODELS
+    SOCKET --> MODELS
+    MODELS --> POSTGRES
+    MODELS -. local DATABASE_URL .-> SQLITE
 ```
 
 In production, the HTTP API and WebSocket handler both use the configured PostgreSQL database. Local development defaults to SQLite. WebSocket presence and connection routing live in backend process memory, so this setup is intended for one API instance rather than a horizontally scaled cluster.
