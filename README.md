@@ -166,19 +166,3 @@ The mock OTP is `123456`. This is demo-only behavior: there is no SMS provider, 
 - **Placeholders:** Voice/video calls, stories, and linked devices are not implemented. Avatar upload is stored as a data URL; large files and general message attachments are not supported.
 - **Time:** Message timestamps are stored by the backend in UTC and formatted for display in the browser’s local time zone.
 
-## Checks
-
-From `frontend/`:
-
-```powershell
-npm.cmd run lint
-npm.cmd run build
-```
-
-From `backend/`:
-
-```powershell
-python -m compileall -q .
-```
-
-There is no automated backend test suite configured yet. `backend/test_websocket.py` is a manual WebSocket script and requires a running local API plus a valid session cookie; it is not a standalone test runner.
