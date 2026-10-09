@@ -5,6 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import engine, Base
 import models
+from models import User
+from database import SessionLocal
 
 from routes.auth import router as auth_router
 from routes.contacts import router as contacts_router
@@ -18,6 +20,18 @@ from routes.websocket import router as websocket_router
 # =========================
 
 Base.metadata.create_all(bind=engine)
+
+# Optional one-time sample data for a fresh hosted database. This guard makes
+# restarts safe after the first successful seed.
+if os.getenv("SEED_DEMO_DATA", "false").lower() == "true":
+    db = SessionLocal()
+    try:
+        if db.query(User).count() == 0:
+            from seed import seed_database
+
+            seed_database()
+    finally:
+        db.close()
 
 
 # =========================
